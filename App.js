@@ -1,19 +1,19 @@
-import { StyleSheet, View } from 'react-native';
-import LoginScreen from './screens/LoginScreen'
+import { Provider } from 'react-redux';
+import { store } from './store';
+
+import * as SplashScreen from "expo-splash-screen";
+
+import Navigation from './navigation';
+import { StatusBar } from './components/Themed';
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <LoginScreen />
-    </View>
+    <Provider store={store}>
+      <Navigation />
+      <StatusBar />
+    </Provider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

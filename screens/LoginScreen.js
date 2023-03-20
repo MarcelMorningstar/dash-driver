@@ -32,7 +32,7 @@ export default function LoginScreen() {
             width: '32%',
             resizeMode: 'contain'
           }}
-          source={require("../assets/logo.png")}
+          source={require("../assets/icon.png")}
         />
 
         <View style={{ flex: 6, width: '70%' }}>
