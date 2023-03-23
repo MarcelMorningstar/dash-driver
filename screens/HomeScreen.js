@@ -3,6 +3,7 @@ import { StyleSheet, Switch, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Map from '../components/Map'
+import BootomSheet from '../components/BootomSheet'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { selectUserToken } from '../slices/authSlice'
@@ -112,6 +113,8 @@ export default function HomeScreen() {
       <Map mapRef={mapRef} origin={origin} directionsView={directionsView} userLocationChange={userLocationChange} insets={insets}>
 
       </Map>
+
+      <BootomSheet />
     </View>
   )
 }

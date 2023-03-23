@@ -29,7 +29,7 @@ export default function LoginScreen() {
         <Image 
           style={{
             flex: 4,
-            width: '32%',
+            width: '70%',
             resizeMode: 'contain'
           }}
           source={require("../assets/icon.png")}

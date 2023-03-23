@@ -42,40 +42,45 @@ function RootNavigator() {
   onAuthStateChanged(auth, (user) => {
     (async () => {
       if (user) {
-        let { status } = await Location.requestForegroundPermissionsAsync()
-  
-        if (status !== 'granted') {
-          console.log('Permission to access location was denied')
-          return
+        try {
+          let { status } = await Location.requestForegroundPermissionsAsync()
+    
+          if (status !== 'granted') {
+            console.log('Permission to access location was denied')
+            return
+          }
+    
+          let location = await Location.getCurrentPositionAsync({})
+
+          dispatch(setOrigin({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude
+          }))
+
+          // console.log(user.uid)
+
+          const docSnap = await getDoc(doc(firestore, "drivers", user.uid))
+          // const fileUri = FileSystem.documentDirectory + "photo";
+
+          // console.log(docSnap.data())
+          
+          // FileSystem.downloadAsync(user.photoURL, fileUri)
+
+          dispatch(setUserInfo({
+            // name: user.displayName,
+            // firstName: docSnap.data().firstName,
+            // lastName: docSnap.data().lastName,
+            // phone: docSnap.data().phoneNumber,
+            // email: user.email,
+            // image: user.photoURL,
+            // thumbnail: fileUri
+          }))
+
+          dispatch(setUserToken(user.uid))
+        } catch (error) {
+          dispatch(setUserToken(null))
+          dispatch(setUserInfo(null))
         }
-  
-        let location = await Location.getCurrentPositionAsync({})
-
-        dispatch(setOrigin({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude
-        }))
-
-        console.log(user.uid)
-
-        const docSnap = await getDoc(doc(firestore, "drivers", user.uid))
-        // const fileUri = FileSystem.documentDirectory + "photo";
-
-        console.log(docSnap.data())
-        
-        // FileSystem.downloadAsync(user.photoURL, fileUri)
-
-        dispatch(setUserInfo({
-          // name: user.displayName,
-          // firstName: docSnap.data().firstName,
-          // lastName: docSnap.data().lastName,
-          // phone: docSnap.data().phoneNumber,
-          // email: user.email,
-          // image: user.photoURL,
-          // thumbnail: fileUri
-        }))
-
-        dispatch(setUserToken(user.uid))
       } else {
         dispatch(setUserToken(null))
       }
