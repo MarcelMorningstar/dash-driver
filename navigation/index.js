@@ -66,6 +66,9 @@ function RootNavigator() {
           
           // FileSystem.downloadAsync(user.photoURL, fileUri)
 
+          dispatch(setActive(docSnap.data().active))
+          dispatch(setActive(docSnap.data().available))
+
           dispatch(setUserInfo({
             // name: user.displayName,
             // firstName: docSnap.data().firstName,

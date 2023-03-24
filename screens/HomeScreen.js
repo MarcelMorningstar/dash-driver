@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { StyleSheet, Switch, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -8,8 +8,9 @@ import BootomSheet from '../components/BootomSheet'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectUserToken } from '../slices/authSlice'
 import { selectActive, selectAvailable, selectOrigin, setActive, setAvailable, setOrigin } from '../slices/mainSlice'
+import { setOrderToken, setOrderInformation, setCustomerInformation } from '../slices/orderSlice'
 
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, query, where, onSnapshot } from "firebase/firestore"
 import { firestore } from '../firebase'
 
 export default function HomeScreen() {
@@ -24,7 +25,50 @@ export default function HomeScreen() {
   const available = useSelector(selectAvailable)
 
   const [directionsView, setDirectionsView] = useState(false)
+  const [calls, setCalls] = useState([])
 
+  useEffect(() => {
+    const q = query(collection(firestore, "calls"), where("status", "==", "in wait"))
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const calls = []
+  
+      querySnapshot.forEach((doc) => {
+        calls.push({...doc.data(), id: doc.id})
+      })
+  
+      console.log(calls)
+  
+      setCalls(calls)
+    })
+  }, [])
+
+  useEffect(() => {
+    (
+      async () => {
+        if (calls.length > 0) {
+          dispatch(setOrderToken(calls[0].id))
+          dispatch(setOrderInformation({
+            pick_up: calls[0].pick_up,
+            destination: calls[0].destination,
+            type: calls[0].type
+          }))
+
+          const user = await getDoc(doc(firestore, 'users', calls[0].user))
+
+          dispatch(setCustomerInformation({
+            displayName: user.data().displayName,
+            phone: user.data().phone,
+          }))
+        } else {
+          dispatch(setOrderToken(null))
+          dispatch(setOrderInformation(null))
+          dispatch(setCustomerInformation(null))
+        }
+      }
+    )()
+  }, [calls])
+  
   const styles = StyleSheet.create({
     statusContainer: {
       position: 'absolute',
