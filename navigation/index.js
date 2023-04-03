@@ -8,10 +8,12 @@ import { NavigationContainer } from "../components/Themed";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
+import ProfileStackNavigator from './ProfileStackNavigator';
+import SettingsScreen from '../screens/SettingsScreen';
 
 import Colors from "../constants/Colors";
 
@@ -117,12 +119,29 @@ function BottomTabNavigator() {
       screenOptions={{
         tabBarShowLabel: false,
         tabBarActiveTintColor: Colors[theme]['primary']
-      }}>
+      }}
+    >
+      <BottomTab.Screen
+        name="ProfileStackNavigator"
+        component={ProfileStackNavigator}
+        options={{
+          tabBarIcon: ({ color }) => <Feather name="user" color={color} size={30} style={{ marginBottom: -3 }} />,
+          headerShown: false,
+        }}
+      />
       <BottomTab.Screen
         name="Home"
         component={HomeScreen}
         options={{
           tabBarIcon: ({ color }) => <Ionicons name="car-outline" color={color} size={40} style={{ marginBottom: -3 }} />,
+          headerShown: false,
+        }}
+      />
+      <BottomTab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ color }) => <Ionicons name="settings-outline" color={color} size={30} style={{ marginBottom: -3 }} />,
           headerShown: false,
         }}
       />
