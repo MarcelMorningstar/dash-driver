@@ -1,11 +1,13 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 
-export default function ProfileScreen() {
+import Layout from '../components/Layout'
+
+export default function ProfileScreen({ navigation }) {
   return (
-    <View>
-      <Text>ProfileScreen</Text>
-    </View>
+    <Layout title='Profile' navigation={navigation} backScreen='Home'>
+      
+    </Layout>
   )
 }
 

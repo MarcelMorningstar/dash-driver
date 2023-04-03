@@ -1,11 +1,11 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 
-export default function EditProfileScreen() {
+export default function EditProfileScreen({ navigation }) {
   return (
-    <View>
-      <Text>EditProfileScreen</Text>
-    </View>
+    <Layout title='Edit Profile' navigation={navigation} backScreen='Profile'>
+      
+    </Layout>
   )
 }
 

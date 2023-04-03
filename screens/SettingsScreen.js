@@ -1,11 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { StyleSheet } from 'react-native'
 
-export default function SettingsScreen() {
+import Layout from '../components/Layout'
+
+export default function SettingsScreen({ navigation }) {
   return (
-    <View>
-      <Text>SettingsScreen</Text>
-    </View>
+    <Layout title='Settings' navigation={navigation} backScreen='Home'>
+      
+    </Layout>
   )
 }
 

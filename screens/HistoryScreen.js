@@ -1,11 +1,11 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 
 export default function HistoryScreen() {
   return (
-    <View>
-      <Text>HistoryScreen</Text>
-    </View>
+    <Layout title='History' navigation={navigation} backScreen='Profile'>
+      
+    </Layout>
   )
 }
 
