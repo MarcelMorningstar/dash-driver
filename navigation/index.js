@@ -72,12 +72,12 @@ function RootNavigator() {
           dispatch(setActive(docSnap.data().available))
 
           dispatch(setUserInfo({
-            // name: user.displayName,
-            // firstName: docSnap.data().firstName,
-            // lastName: docSnap.data().lastName,
-            // phone: docSnap.data().phoneNumber,
-            // email: user.email,
-            // image: user.photoURL,
+            displayName: user.displayName,
+            firstName: docSnap.data().firstName,
+            lastName: docSnap.data().lastName,
+            phoneNumber: docSnap.data().phoneNumber,
+            email: user.email,
+            image: user.photoURL,
             // thumbnail: fileUri
           }))
 
