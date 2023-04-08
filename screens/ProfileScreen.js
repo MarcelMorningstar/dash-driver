@@ -74,7 +74,7 @@ export default function ProfileScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.btn}
-            onPress={() => {}}
+            onPress={() => navigation.navigate('EditPrice')}
           >
             <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
               <Ionicons name="briefcase-outline" size={28} style={{ marginRight: 12 }} />
