@@ -5,10 +5,11 @@ import { BottomSheetModal, BottomSheetModalProvider } from "@gorhom/bottom-sheet
 
 import Colors from '../constants/Colors'
 
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { selectOrderToken, selectOrderInformation, selectCustomerInformation } from '../slices/orderSlice'
 
-export default function BootomSheet() {
+export default function BootomSheet({ acceptCall, ignoreCall }) {
+  const dispatch = useDispatch()
   const orderToken = useSelector(selectOrderToken)
   const orderInformation = useSelector(selectOrderInformation)
   const customerInformation = useSelector(selectCustomerInformation)
@@ -20,6 +21,10 @@ export default function BootomSheet() {
       handleSnapPress(0)
     }
   }, [orderToken])
+
+  useEffect(() => {
+    handlePresentModalPress()
+  }, [])
 
   const sheetHeight = useRef(new Animated.Value(0)).current;
   const [top, setTop] = useState(0)
@@ -44,10 +49,6 @@ export default function BootomSheet() {
   const handleSheetChanges = useCallback((index) => {
     animation(snapPoints[index])
   }, []);
-
-  useEffect(() => {
-    handlePresentModalPress()
-  }, [])
 
   const animation = (endValue) => {
     Animated.timing(sheetHeight, {
@@ -96,7 +97,7 @@ export default function BootomSheet() {
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <PrimaryTouchableHighlight
                   style={[{ width: '64%' }, styles.button]}
-                  onPress={() => createCall()}
+                  onPress={() => acceptCall(orderToken)}
                 >
                   <View style={{ alignItems: 'center' }}>
                     <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Accept</Text>
@@ -108,7 +109,7 @@ export default function BootomSheet() {
                   activeOpacity={0.8}
                   underlayColor="#6A6A6A"
                   style={[{ width: '32%', backgroundColor: '#555555' }, styles.button]}
-                  onPress={() => {}}
+                  onPress={() => ignoreCall(orderToken)}
                 >
                   <Text style={{ fontSize: 16, fontWeight: '400', color: 'white' }}>Ignore</Text>
                 </TouchableHighlight>
