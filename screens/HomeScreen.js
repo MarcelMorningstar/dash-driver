@@ -37,8 +37,6 @@ export default function HomeScreen() {
         calls.push({...doc.data(), id: doc.id})
       })
   
-      console.log(calls)
-  
       setCalls(calls)
     })
   }, [])
@@ -46,7 +44,7 @@ export default function HomeScreen() {
   useEffect(() => {
     (
       async () => {
-        if (calls.length > 0) {
+        if (active && calls.length > 0) {
           dispatch(setOrderToken(calls[0].id))
           dispatch(setOrderInformation({
             pick_up: calls[0].pick_up,
@@ -67,7 +65,7 @@ export default function HomeScreen() {
         }
       }
     )()
-  }, [calls])
+  }, [active, calls])
   
   const styles = StyleSheet.create({
     statusContainer: {
@@ -122,43 +120,69 @@ export default function HomeScreen() {
   
   const toggleActive = (active) => {
     dispatch(setActive(!active))
-    dispatch(setAvailable(!active))
 
     const driverRef = doc(firestore, "drivers", userToken);
 
     updateDoc(driverRef, {
       active: !active,
-      available: !active
     }).then(() => {
 
     }).catch((error) => {
       dispatch(setActive(active))
-      dispatch(setAvailable(active))
     })
+  }
+
+  const acceptCall = async (orderToken) => {
+    const callRef = doc(firestore, "calls", orderToken);
+    const driverRef = doc(firestore, "drivers", userToken);
+
+    await updateDoc(callRef, {
+      driver: userToken,
+      status: 'waiting driver'
+    });
+
+    await updateDoc(driverRef, {
+      available: false
+    });
+
+    dispatch(setAvailable(false))
+  }
+
+  const ignoreCall = (orderToken) => {
+    const index = calls.findIndex(e => e.id === orderToken)
+    let temp = calls;
+
+    temp.splice(index, 1)
+
+    setCalls(temp)
   }
 
   return (
     <View behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-      <View style={styles.statusContainer}>
-        <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-          <View style={[styles.statusCircle, active ? { backgroundColor: '#2ad586' } : { backgroundColor: '#c8c8c8' }]}></View>
-          <Text style={styles.statusText}>{ active ? 'Online' : 'Offline' }</Text>
-        </View>
-        <Switch 
-          trackColor={{false: '#c8c8c8', true: '#c8c8c8'}}
-          thumbColor={active ? '#2ad586' : '#f4f3f4'}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={() => toggleActive(active)}
-          value={active}
-          style={styles.statusSwitch}
-        />
-      </View>
+      {
+        available && (
+          <View style={styles.statusContainer}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+              <View style={[styles.statusCircle, active ? { backgroundColor: '#2ad586' } : { backgroundColor: '#c8c8c8' }]}></View>
+              <Text style={styles.statusText}>{ active ? 'Online' : 'Offline' }</Text>
+            </View>
+            <Switch 
+              trackColor={{false: '#c8c8c8', true: '#c8c8c8'}}
+              thumbColor={active ? '#2ad586' : '#f4f3f4'}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={() => toggleActive(active)}
+              value={active}
+              style={styles.statusSwitch}
+            />
+          </View>
+        )
+      }
 
       <Map mapRef={mapRef} origin={origin} directionsView={directionsView} userLocationChange={userLocationChange} insets={insets}>
 
       </Map>
 
-      <BootomSheet />
+      <BootomSheet acceptCall={acceptCall} ignoreCall={ignoreCall} />
     </View>
   )
 }

@@ -59,25 +59,22 @@ function RootNavigator() {
             longitude: location.coords.longitude
           }))
 
-          // console.log(user.uid)
-
           const docSnap = await getDoc(doc(firestore, "drivers", user.uid))
-          // const fileUri = FileSystem.documentDirectory + "photo";
+          // const fileUri = FileSystem.documentDirectory + "photo"
 
-          // console.log(docSnap.data())
-          
-          // FileSystem.downloadAsync(user.photoURL, fileUri)
+          // FileSystem.downloadAsync(docSnap.data().photoURL, fileUri)
 
           dispatch(setActive(docSnap.data().active))
-          dispatch(setActive(docSnap.data().available))
+          dispatch(setAvailable(docSnap.data().available))
 
           dispatch(setUserInfo({
-            displayName: user.displayName,
+            displayName: docSnap.data().displayName,
             firstName: docSnap.data().firstName,
             lastName: docSnap.data().lastName,
             phoneNumber: docSnap.data().phoneNumber,
-            email: user.email,
-            image: user.photoURL,
+            email: docSnap.data().email,
+            services: docSnap.data().services,
+            // image: docSnap.data().photoURL,
             // thumbnail: fileUri
           }))
 

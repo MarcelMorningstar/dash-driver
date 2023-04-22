@@ -1,46 +1,74 @@
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View, Text, TouchableWithoutFeedback } from 'react-native'
-import { PrimaryView, TextInput, PrimaryTouchableHighlight } from '../components/Themed'
+import { PrimaryTouchableHighlight } from '../components/Themed'
+import CurrencyInput from 'react-native-currency-input';
 
 import Layout from '../components/Layout'
 
+import { useDispatch, useSelector } from 'react-redux'
+import { selectUserInfo, selectUserToken, setUserInfo } from '../slices/authSlice'
+
+import { doc, updateDoc } from 'firebase/firestore';
+import { firestore } from '../firebase';
+
 export default function EditPriceScreen({ navigation }) {
+  const dispatch = useDispatch()
+  const userToken = useSelector(selectUserToken)
+  const userInfo = useSelector(selectUserInfo)
   const [chargePerDistance1, setChargePerDistance1] = useState()
   const [chargePerTime1, setChargePerTime1] = useState()
   const [chargeOfBoarding1, setChargeOfBoarding1] = useState()
   const [chargePerDistance2, setChargePerDistance2] = useState()
   const [chargePerTime2, setChargePerTime2] = useState()
   const [chargeOfBoarding2, setChargeOfBoarding2] = useState()
-  const [chargePerDistance3, setChargePerDistance3] = useState()
-  const [chargePerTime3, setChargePerTime3] = useState()
-  const [chargeOfTaking3, setChargeOfTaking3] = useState()
-  const [taxi, setTaxi] = useState(true);
+  const [taxi, setTaxi] = useState(false);
   const [secondDriver, setSecondDriver] = useState(false);
-  const [packages, setPackages] = useState(false);
 
   useEffect(() => {
-    if (!taxi) {
-      setChargePerDistance1('')
-      setChargePerTime1('')
-      setChargeOfBoarding1('')
-    }
-  }, [taxi])
+    setTaxi(userInfo.services.taxi.work)
+    setChargePerDistance1(userInfo.services.taxi.values[0].toString())
+    setChargePerTime1(userInfo.services.taxi.values[1].toString())
+    setChargeOfBoarding1(userInfo.services.taxi.values[2].toString())
 
-  useEffect(() => {
-    if (!secondDriver) {
-      setChargePerDistance2('')
-      setChargePerTime2('')
-      setChargeOfBoarding2('')
-    }
-  }, [secondDriver])
+    setSecondDriver(userInfo.services.secondDriver.work)
+    setChargePerDistance2(userInfo.services.secondDriver.values[0].toString())
+    setChargePerTime2(userInfo.services.secondDriver.values[1].toString())
+    setChargeOfBoarding2(userInfo.services.secondDriver.values[2].toString())
+  }, [])
 
-  useEffect(() => {
-    if (!packages) {
-      setChargePerDistance3('')
-      setChargePerTime3('')
-      setChargeOfTaking3('')
-    }
-  }, [packages])
+  const savePricing = () => {
+    const driverRef = doc(firestore, "drivers", userToken);
+
+    updateDoc(driverRef, {
+      services: {
+        taxi: {
+          work: taxi,
+          values: [parseFloat(chargePerDistance1), parseFloat(chargePerTime1), parseFloat(chargeOfBoarding1)]
+        },
+        secondDriver: {
+          work: secondDriver,
+          values: [parseFloat(chargePerDistance2), parseFloat(chargePerTime2), parseFloat(chargeOfBoarding2)]
+        }
+      },
+    }).then(() => {
+      dispatch(setUserInfo({
+        services: {
+          taxi: {
+            work: taxi,
+            values: [parseFloat(chargePerDistance1), parseFloat(chargePerTime1), parseFloat(chargeOfBoarding1)]
+          },
+          secondDriver: {
+            work: secondDriver,
+            values: [parseFloat(chargePerDistance2), parseFloat(chargePerTime2), parseFloat(chargeOfBoarding2)]
+          }
+        }
+      }))
+
+      navigation.goBack()
+    }).catch((error) => {
+      
+    })
+  }
 
   return (
     <Layout title='Services' navigation={navigation} backScreen='Profile'>
@@ -56,27 +84,39 @@ export default function EditPriceScreen({ navigation }) {
               </View>
             </TouchableWithoutFeedback>
           
-            <TextInput 
+            <CurrencyInput 
               placeholder='Price per kilometer'
-              onChangeText={setChargePerDistance1}
-              value={chargePerDistance1}
+              value={chargePerDistance1} 
+              onChangeValue={setChargePerDistance1}
               editable={taxi}
+              ignoreNegative={true}
+              precision={2}
+              prefix="€ "
+              separator=","
               style={styles.input}
             />
           
-            <TextInput
+            <CurrencyInput
               placeholder='Price per minute'
-              onChangeText={setChargePerTime1}
               value={chargePerTime1}
+              onChangeValue={setChargePerTime1}
               editable={taxi}
+              ignoreNegative={true}
+              precision={2}
+              prefix="€ "
+              separator=","
               style={styles.input}
             />
           
-            <TextInput 
+            <CurrencyInput 
               placeholder='Price of boarding'
-              onChangeText={setChargeOfBoarding1}
               value={chargeOfBoarding1}
+              onChangeValue={setChargeOfBoarding1}
               editable={taxi}
+              ignoreNegative={true}
+              precision={2}
+              prefix="€ "
+              separator=","
               style={styles.input}
             />
           </View>
@@ -91,62 +131,39 @@ export default function EditPriceScreen({ navigation }) {
               </View>
             </TouchableWithoutFeedback>
           
-            <TextInput 
+            <CurrencyInput 
               placeholder='Price per kilometer'
-              onChangeText={setChargePerDistance2}
               value={chargePerDistance2}
+              onChangeValue={setChargePerDistance2}
               editable={secondDriver}
+              ignoreNegative={true}
+              precision={2}
+              prefix="€ "
+              separator=","
               style={styles.input}
             />
           
-            <TextInput
+            <CurrencyInput
               placeholder='Price per minute'
-              onChangeText={setChargePerTime2}
               value={chargePerTime2}
+              onChangeValue={setChargePerTime2}
               editable={secondDriver}
+              ignoreNegative={true}
+              precision={2}
+              prefix="€ "
+              separator=","
               style={styles.input}
             />
           
-            <TextInput 
+            <CurrencyInput 
               placeholder='Price of boarding'
-              onChangeText={setChargeOfBoarding2}
               value={chargeOfBoarding2}
+              onChangeValue={setChargeOfBoarding2}
               editable={secondDriver}
-              style={styles.input}
-            />
-          </View>
-
-          <View style={styles.serviceContainer}>
-            <TouchableWithoutFeedback onPress={() => setPackages(!packages)}>
-              <View style={styles.radioButton}>
-                <View style={styles.valueContainer}>
-                  <View style={[styles.value, packages ? { backgroundColor: "#E88D0A" } : { backgroundColor: "transparent" }]}></View>
-                </View>
-                <Text style={styles.radioButtonText}>Packages</Text>
-              </View>
-            </TouchableWithoutFeedback>
-          
-            <TextInput 
-              placeholder='Price per kilometer'
-              onChangeText={setChargePerDistance3}
-              value={chargePerDistance3}
-              editable={packages}
-              style={styles.input}
-            />
-          
-            <TextInput
-              placeholder='Price per minute'
-              onChangeText={setChargePerTime3}
-              value={chargePerTime3}
-              editable={packages}
-              style={styles.input}
-            />
-          
-            <TextInput 
-              placeholder='Price of boarding'
-              onChangeText={setChargeOfTaking3}
-              value={chargeOfTaking3}
-              editable={packages}
+              ignoreNegative={true}
+              precision={2}
+              prefix="€ "
+              separator=","
               style={styles.input}
             />
           </View>
@@ -155,7 +172,7 @@ export default function EditPriceScreen({ navigation }) {
         <PrimaryTouchableHighlight
           activeOpacity={0.6}
           style={styles.saveBtn}
-          onPress={() => {}}
+          onPress={() => savePricing()}
         >
           <Text style={{ color: 'white', fontSize: 24, fontWeight: '500' }}>Save</Text>
         </PrimaryTouchableHighlight>
@@ -185,7 +202,8 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     paddingHorizontal: 16,
     fontSize: 16,
-    borderRadius: 12
+    backgroundColor: '#DDD',
+    borderRadius: 12,
   },
   radioButton: {
     flexDirection: 'row',
