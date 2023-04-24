@@ -7,12 +7,30 @@ import Colors from '../constants/Colors'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { selectOrderToken, selectOrderInformation, selectCustomerInformation } from '../slices/orderSlice'
+import { selectTheme } from '../slices/authSlice'
 
 export default function BootomSheet({ acceptCall, ignoreCall }) {
   const dispatch = useDispatch()
   const orderToken = useSelector(selectOrderToken)
   const orderInformation = useSelector(selectOrderInformation)
   const customerInformation = useSelector(selectCustomerInformation)
+
+  const storageTheme = useSelector(selectTheme)
+  const [theme, setTheme] = useState(storageTheme === 'automatic' ? Appearance.getColorScheme() : storageTheme);
+
+  useEffect(() => {
+    if (storageTheme !== 'automatic') {
+      setTheme(storageTheme)
+    } else {
+      setTheme(Appearance.getColorScheme())
+    }
+  }, [storageTheme])
+
+  Appearance.addChangeListener((T) => {
+    if (storageTheme === 'automatic') {
+      setTheme(T.colorScheme)
+    }
+  })
 
   useEffect(() => {
     if (!!orderToken) {
@@ -29,11 +47,6 @@ export default function BootomSheet({ acceptCall, ignoreCall }) {
   const sheetHeight = useRef(new Animated.Value(0)).current;
   const [top, setTop] = useState(0)
   const [b, setB] = useState(0)
-  const [theme, setTheme] = useState(Appearance.getColorScheme());
-
-  Appearance.addChangeListener((T) => {
-    setTheme(T.colorScheme)
-  })
 
   const bottomSheetModalRef = useRef(null);
   const snapPoints = useMemo(() => [24, 107, 250, 360], []);

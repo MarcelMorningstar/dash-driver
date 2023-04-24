@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { StyleSheet, Switch, Text, View } from 'react-native'
+import { StyleSheet, Switch, View } from 'react-native'
+import { SafeAreaView, Text } from '../components/Themed'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Map from '../components/Map'
@@ -77,7 +78,6 @@ export default function HomeScreen() {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: 'white',
       width: 170,
       height: 56,
       paddingHorizontal: 13,
@@ -161,7 +161,7 @@ export default function HomeScreen() {
     <View behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
       {
         available && (
-          <View style={styles.statusContainer}>
+          <SafeAreaView style={styles.statusContainer}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
               <View style={[styles.statusCircle, active ? { backgroundColor: '#2ad586' } : { backgroundColor: '#c8c8c8' }]}></View>
               <Text style={styles.statusText}>{ active ? 'Online' : 'Offline' }</Text>
@@ -174,7 +174,7 @@ export default function HomeScreen() {
               value={active}
               style={styles.statusSwitch}
             />
-          </View>
+          </SafeAreaView>
         )
       }
 

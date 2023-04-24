@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, View, Text, TouchableWithoutFeedback } from 'react-native'
-import { PrimaryTouchableHighlight } from '../components/Themed'
+import { ScrollView, StyleSheet, View, TouchableWithoutFeedback } from 'react-native'
+import { Text, PrimaryTouchableHighlight } from '../components/Themed'
 import CurrencyInput from 'react-native-currency-input';
 
 import Layout from '../components/Layout'
