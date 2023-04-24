@@ -10,6 +10,11 @@ import * as ImagePicker from 'expo-image-picker'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectUserInfo, selectUserToken, setUserInfo } from '../slices/authSlice'
 
+import { updateProfile } from "firebase/auth"
+import { doc, updateDoc } from "firebase/firestore"
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { auth, firestore, storage } from '../firebase'
+
 export default function EditProfileScreen({ navigation }) {
   const dispatch = useDispatch()
   const userInfo = useSelector(selectUserInfo)
@@ -17,15 +22,67 @@ export default function EditProfileScreen({ navigation }) {
   const [displayName, setDisplayName] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
   const [pickedImage, setPickedImage] = useState(null)
 
   useEffect(() => {
     setDisplayName(userInfo.displayName)
     setFirstName(userInfo.firstName)
     setLastName(userInfo.lastName)
-    setEmail(userInfo.email)
   }, [userInfo])
+
+  const updateUserData = async () => {
+    await updateDoc(doc(firestore, "drivers", userToken), {
+      displayName: displayName,
+      firstName: firstName,
+      lastName: lastName,
+    }).then(() => {
+      updateProfile(auth.currentUser, {
+        displayName: displayName,
+      }).then(() => {
+        dispatch(setUserInfo({
+          displayName: displayName,
+          firstName: firstName,
+          lastName: lastName,
+        }))
+      })
+    })
+
+    if (pickedImage) {
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function() {
+          reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', pickedImage, true);
+        xhr.send(null);
+      })
+
+      const storageRef = ref(storage, `drivers/${userToken}`)
+
+      uploadBytes(storageRef, blob).then(async (snapshot) => {
+        let i = await getDownloadURL(ref(storage, `drivers/${userToken}`))
+
+        await updateDoc(doc(firestore, "drivers", userToken), {
+          photoURL: i,
+        }).then(() => {
+          updateProfile(auth.currentUser, {
+            photoURL: i,
+          }).then(() => {
+            dispatch(setUserInfo({
+              image: i,
+              thumbnail: pickedImage
+            }))
+          })
+        })
+      });
+    }
+
+    navigation.navigate('Profile')
+  }
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -88,19 +145,12 @@ export default function EditProfileScreen({ navigation }) {
             value={lastName}
             style={styles.input}
           />
-
-          <TextInput 
-            placeholder='Email'
-            onChangeText={setEmail}
-            value={email}
-            style={styles.input}
-          />
         </View>
 
         <PrimaryTouchableHighlight
           activeOpacity={0.6}
           style={styles.saveBtn}
-          onPress={() => {}}
+          onPress={updateUserData}
         >
           <Text style={{ color: 'white', fontSize: 24, fontWeight: '500' }}>Save</Text>
         </PrimaryTouchableHighlight>
