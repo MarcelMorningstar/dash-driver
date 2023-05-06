@@ -1,20 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { StyleSheet, Switch, View } from 'react-native'
-import { SafeAreaView, Text } from '../components/Themed'
+import { Appearance, PixelRatio, Platform, StyleSheet, Switch, View } from 'react-native'
+import { SafeAreaView, Text, TouchableHighlight } from '../components/Themed'
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Marker } from 'react-native-maps'
+import MapViewDirections from 'react-native-maps-directions'
 
 import Map from '../components/Map'
 import BootomSheet from '../components/BootomSheet'
 
+import Colors from '../constants/Colors'
+
+import { getDistance } from '../utils/distancematrix'
+
 import { useDispatch, useSelector } from 'react-redux'
-import { selectUserToken } from '../slices/authSlice'
+import { selectTheme, selectUserToken } from '../slices/authSlice'
 import { selectActive, selectAvailable, selectOrigin, setActive, setAvailable, setOrigin } from '../slices/mainSlice'
-import { setOrderToken, setOrderInformation, setCustomerInformation } from '../slices/orderSlice'
+import { setOrderToken, setOrderInformation, setCustomerInformation, selectOrderToken, selectOrderInformation } from '../slices/orderSlice'
 
 import { doc, getDoc, updateDoc, collection, query, where, onSnapshot } from "firebase/firestore"
 import { firestore } from '../firebase'
 
+import { GOOGLE_API_KEY } from '@env'
+
 export default function HomeScreen() {
+  const storageTheme = useSelector(selectTheme)
+  const [theme, setTheme] = useState(storageTheme === 'automatic' ? Appearance.getColorScheme() : storageTheme);
   const insets = useSafeAreaInsets()
 
   const mapRef = useRef(null)
@@ -24,9 +35,25 @@ export default function HomeScreen() {
   const origin = useSelector(selectOrigin)
   const active = useSelector(selectActive)
   const available = useSelector(selectAvailable)
+  const orderToken = useSelector(selectOrderToken)
+  const orderInformation = useSelector(selectOrderInformation)
 
   const [directionsView, setDirectionsView] = useState(false)
   const [calls, setCalls] = useState([])
+
+  useEffect(() => {
+    if (storageTheme !== 'automatic') {
+      setTheme(storageTheme)
+    } else {
+      setTheme(Appearance.getColorScheme())
+    }
+  }, [storageTheme])
+
+  Appearance.addChangeListener((T) => {
+    if (storageTheme === 'automatic') {
+      setTheme(T.colorScheme)
+    }
+  })
 
   useEffect(() => {
     const q = query(collection(firestore, "calls"), where("status", "==", "in wait"))
@@ -35,7 +62,9 @@ export default function HomeScreen() {
       const calls = []
   
       querySnapshot.forEach((doc) => {
-        calls.push({...doc.data(), id: doc.id})
+        if (getDistance(origin.latitude, doc.data().pick_up.latitude, origin.longitude, doc.data().pick_up.longitude) < 10) {
+          calls.push({...doc.data(), id: doc.id})
+        }
       })
   
       setCalls(calls)
@@ -97,6 +126,21 @@ export default function HomeScreen() {
     },
     statusSwitch: {
       transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }]
+    },
+    centerBtn: {
+      position: 'absolute',
+      zIndex: 7,
+      top: insets.top + 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 50,
+      height: 50,
+      padding: 8,
+      backgroundColor: 'white',
+      borderRadius: 25,
+      elevation: 7,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.25
     }
   })
 
@@ -126,7 +170,9 @@ export default function HomeScreen() {
     updateDoc(driverRef, {
       active: !active,
     }).then(() => {
-
+      if (active) {
+        fitUser(360)
+      }
     }).catch((error) => {
       dispatch(setActive(active))
     })
@@ -157,6 +203,35 @@ export default function HomeScreen() {
     setCalls(temp)
   }
 
+  const fitUser = (delay) => {
+    setTimeout(() => { 
+      mapRef.current.animateToRegion({ 
+        latitude: origin.latitude, 
+        longitude: origin.longitude, 
+        latitudeDelta: 0.018,
+        longitudeDelta: 0.012,
+      }, 1000)
+    }, delay)
+  }
+
+  const fitDirection = (delay) => {
+    setTimeout(() => {
+      mapRef.current.fitToCoordinates([
+        { latitude: origin.latitude, longitude: origin.longitude },
+        { latitude: orderInformation.pick_up.latitude, longitude: orderInformation.pick_up.longitude },
+        { latitude: orderInformation.destination.latitude, longitude: orderInformation.destination.longitude },
+      ], {
+        edgePadding: {
+          top: 124,
+          right: 40,
+          bottom: 32,
+          left: 40,
+        },
+        animated: true
+      })
+    }, delay)
+  }
+
   return (
     <View behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
       {
@@ -178,11 +253,78 @@ export default function HomeScreen() {
         )
       }
 
-      <Map mapRef={mapRef} origin={origin} directionsView={directionsView} userLocationChange={userLocationChange} insets={insets}>
+      <TouchableHighlight
+        activeOpacity={0.6}
+        style={[styles.centerBtn, { right: 16 }]}
+        onPress={() => fitUser(1)}
+      >
+        <MaterialIcons name="my-location" size={25} color="black" />
+      </TouchableHighlight>
 
+      {
+        orderToken && (
+          <TouchableHighlight
+            activeOpacity={0.6}
+            style={[styles.centerBtn, { left: 16 }]}
+            onPress={() => fitDirection(100)}
+          >
+            <FontAwesome5 name="route" size={25} color="black" />
+          </TouchableHighlight>
+        )
+      }
+
+      <Map mapRef={mapRef} origin={origin} directionsView={directionsView} userLocationChange={userLocationChange} insets={insets}>
+        {
+          orderToken && (
+            <MapViewDirections 
+              origin={origin}
+              destination={orderInformation.pick_up}
+              apikey={GOOGLE_API_KEY}
+              strokeWidth={4}
+              strokeColor={Colors[theme]['tint']}
+            />
+          )
+        }
+
+        {
+          orderToken && (
+            <MapViewDirections 
+              origin={orderInformation.pick_up}
+              destination={orderInformation.destination}
+              apikey={GOOGLE_API_KEY}
+              strokeWidth={4}
+              strokeColor={Colors[theme]['primary']}
+            />
+          )
+        }
+
+        {
+          orderInformation?.pick_up && (
+            <Marker 
+              identifier='customer'
+              coordinate={{
+                latitude: orderInformation.pick_up?.latitude,
+                longitude: orderInformation.pick_up?.longitude,
+              }}
+              image={require('../assets/user.png')}
+            />
+          )
+        }
+
+        {
+          orderInformation?.destination && (
+            <Marker 
+              identifier='destination'
+              coordinate={{
+                latitude: orderInformation.destination?.latitude,
+                longitude: orderInformation.destination?.longitude,
+              }}
+            />
+          )
+        }
       </Map>
 
-      <BootomSheet acceptCall={acceptCall} ignoreCall={ignoreCall} />
+      <BootomSheet acceptCall={acceptCall} ignoreCall={ignoreCall} fitDirection={fitDirection} />
     </View>
   )
 }
