@@ -3,6 +3,7 @@ import { Appearance } from 'react-native';
 import * as SplashScreen from "expo-splash-screen";
 import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { NavigationContainer } from "../components/Themed";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -18,7 +19,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import Colors from "../constants/Colors";
 
 import { useDispatch, useSelector } from 'react-redux';
-import { selectUserToken, setUserInfo, setUserToken } from '../slices/authSlice';
+import { selectUserToken, setTheme, setUserInfo, setUserToken } from '../slices/authSlice';
 import { setOrigin, setActive, setAvailable } from '../slices/mainSlice';
 
 import { onAuthStateChanged } from 'firebase/auth';
@@ -60,9 +61,9 @@ function RootNavigator() {
           }))
 
           const docSnap = await getDoc(doc(firestore, "drivers", user.uid))
-          // const fileUri = FileSystem.documentDirectory + "photo"
+          const fileUri = FileSystem.documentDirectory + "photo"
 
-          // FileSystem.downloadAsync(docSnap.data().photoURL, fileUri)
+          FileSystem.downloadAsync(docSnap.data().photoURL, fileUri)
 
           dispatch(setActive(docSnap.data().active))
           dispatch(setAvailable(docSnap.data().available))
@@ -74,9 +75,19 @@ function RootNavigator() {
             phoneNumber: docSnap.data().phoneNumber,
             email: docSnap.data().email,
             services: docSnap.data().services,
-            // image: docSnap.data().photoURL,
-            // thumbnail: fileUri
+            image: docSnap.data().photoURL,
+            thumbnail: fileUri
           }))
+
+          try {
+            const value = await AsyncStorage.getItem('theme')
+            
+            if (value !== null) {
+              dispatch(setTheme(value))
+            }
+          } catch(e) {
+
+          }
 
           dispatch(setUserToken(user.uid))
         } catch (error) {
