@@ -5,12 +5,11 @@ import { BottomSheetModal, BottomSheetModalProvider } from "@gorhom/bottom-sheet
 
 import Colors from '../constants/Colors'
 
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { selectOrderToken, selectOrderInformation, selectCustomerInformation } from '../slices/orderSlice'
 import { selectTheme } from '../slices/authSlice'
 
-export default function BootomSheet({ acceptCall, ignoreCall }) {
-  const dispatch = useDispatch()
+export default function BootomSheet({ acceptCall, ignoreCall, fitDirection }) {
   const orderToken = useSelector(selectOrderToken)
   const orderInformation = useSelector(selectOrderInformation)
   const customerInformation = useSelector(selectCustomerInformation)
@@ -35,6 +34,7 @@ export default function BootomSheet({ acceptCall, ignoreCall }) {
   useEffect(() => {
     if (!!orderToken) {
       handleSnapPress(2)
+      fitDirection(500)
     } else {
       handleSnapPress(0)
     }
