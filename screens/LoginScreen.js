@@ -5,8 +5,6 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from '../firebase'
 
 export default function LoginScreen() {
-  // const [firstName, setFirstName] = useState('')
-  // const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -14,7 +12,6 @@ export default function LoginScreen() {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log(user)
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -36,16 +33,6 @@ export default function LoginScreen() {
         />
 
         <View style={{ flex: 6, width: '70%' }}>
-          {/* <TextInput 
-            placeholder='First Name'
-            value={firstName}
-            onChangeText={setFirstName}
-          />
-          <TextInput 
-            placeholder='Last Name'
-            value={lastName}
-            onChangeText={setLastName}
-          /> */}
           <TextInput 
             keyboardType='email-address'
             placeholder='Email'
@@ -59,6 +46,7 @@ export default function LoginScreen() {
             placeholder='Password'
             value={password}
             onChangeText={setPassword}
+            secureTextEntry={true}
             style={styles.input}
           />
           <TouchableHighlight 

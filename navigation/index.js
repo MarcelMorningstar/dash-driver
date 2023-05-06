@@ -60,25 +60,6 @@ function RootNavigator() {
             longitude: location.coords.longitude
           }))
 
-          const docSnap = await getDoc(doc(firestore, "drivers", user.uid))
-          const fileUri = FileSystem.documentDirectory + "photo"
-
-          FileSystem.downloadAsync(docSnap.data().photoURL, fileUri)
-
-          dispatch(setActive(docSnap.data().active))
-          dispatch(setAvailable(docSnap.data().available))
-
-          dispatch(setUserInfo({
-            displayName: docSnap.data().displayName,
-            firstName: docSnap.data().firstName,
-            lastName: docSnap.data().lastName,
-            phoneNumber: docSnap.data().phoneNumber,
-            email: docSnap.data().email,
-            services: docSnap.data().services,
-            image: docSnap.data().photoURL,
-            thumbnail: fileUri
-          }))
-
           try {
             const value = await AsyncStorage.getItem('theme')
             
@@ -89,7 +70,30 @@ function RootNavigator() {
 
           }
 
-          dispatch(setUserToken(user.uid))
+          const docSnap = await getDoc(doc(firestore, "drivers", user.uid))
+
+          if (docSnap.exists()) {
+            const fileUri = FileSystem.documentDirectory + "photo"
+
+            FileSystem.downloadAsync(docSnap.data().photoURL, fileUri)
+
+            dispatch(setActive(docSnap.data().active))
+            dispatch(setAvailable(docSnap.data().available))
+
+            dispatch(setUserInfo({
+              displayName: docSnap.data().displayName,
+              firstName: docSnap.data().firstName,
+              lastName: docSnap.data().lastName,
+              phoneNumber: docSnap.data().phoneNumber,
+              email: docSnap.data().email,
+              services: docSnap.data().services,
+              image: docSnap.data().photoURL,
+              thumbnail: fileUri
+            }))
+            dispatch(setUserToken(user.uid))
+          } else {
+            dispatch(setUserInfo(null))
+          }
         } catch (error) {
           dispatch(setUserToken(null))
           dispatch(setUserInfo(null))
