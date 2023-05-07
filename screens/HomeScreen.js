@@ -16,7 +16,7 @@ import { getDistance } from '../utils/distancematrix'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectTheme, selectUserToken } from '../slices/authSlice'
 import { selectActive, selectAvailable, selectOrigin, setActive, setAvailable, setOrigin } from '../slices/mainSlice'
-import { setOrderToken, setOrderInformation, setCustomerInformation, selectOrderToken, selectOrderInformation } from '../slices/orderSlice'
+import { setOrderToken, setOrderInformation, setCustomerInformation, selectOrderToken, selectOrderInformation, addIgnored, selectIgnored } from '../slices/orderSlice'
 
 import { doc, getDoc, updateDoc, collection, query, where, onSnapshot } from "firebase/firestore"
 import { firestore } from '../firebase'
@@ -28,75 +28,6 @@ export default function HomeScreen() {
   const [theme, setTheme] = useState(storageTheme === 'automatic' ? Appearance.getColorScheme() : storageTheme);
   const insets = useSafeAreaInsets()
 
-  const mapRef = useRef(null)
-
-  const dispatch = useDispatch()
-  const userToken = useSelector(selectUserToken)
-  const origin = useSelector(selectOrigin)
-  const active = useSelector(selectActive)
-  const available = useSelector(selectAvailable)
-  const orderToken = useSelector(selectOrderToken)
-  const orderInformation = useSelector(selectOrderInformation)
-
-  const [directionsView, setDirectionsView] = useState(false)
-  const [calls, setCalls] = useState([])
-
-  useEffect(() => {
-    if (storageTheme !== 'automatic') {
-      setTheme(storageTheme)
-    } else {
-      setTheme(Appearance.getColorScheme())
-    }
-  }, [storageTheme])
-
-  Appearance.addChangeListener((T) => {
-    if (storageTheme === 'automatic') {
-      setTheme(T.colorScheme)
-    }
-  })
-
-  useEffect(() => {
-    const q = query(collection(firestore, "calls"), where("status", "==", "in wait"))
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const calls = []
-  
-      querySnapshot.forEach((doc) => {
-        if (getDistance(origin.latitude, doc.data().pick_up.latitude, origin.longitude, doc.data().pick_up.longitude) < 10) {
-          calls.push({...doc.data(), id: doc.id})
-        }
-      })
-  
-      setCalls(calls)
-    })
-  }, [])
-
-  useEffect(() => {
-    (
-      async () => {
-        if (active && calls.length > 0) {
-          dispatch(setOrderToken(calls[0].id))
-          dispatch(setOrderInformation({
-            pick_up: calls[0].pick_up,
-            destination: calls[0].destination,
-            type: calls[0].type
-          }))
-
-          const user = await getDoc(doc(firestore, 'users', calls[0].user))
-
-          dispatch(setCustomerInformation({
-            displayName: user.data().displayName,
-            phone: user.data().phone,
-          }))
-        } else {
-          dispatch(setOrderToken(null))
-          dispatch(setOrderInformation(null))
-          dispatch(setCustomerInformation(null))
-        }
-      }
-    )()
-  }, [active, calls])
-  
   const styles = StyleSheet.create({
     statusContainer: {
       position: 'absolute',
@@ -143,6 +74,78 @@ export default function HomeScreen() {
       shadowOpacity: 0.25
     }
   })
+
+  const mapRef = useRef(null)
+
+  const dispatch = useDispatch()
+  const userToken = useSelector(selectUserToken)
+  const origin = useSelector(selectOrigin)
+  const active = useSelector(selectActive)
+  const available = useSelector(selectAvailable)
+  const orderToken = useSelector(selectOrderToken)
+  const orderInformation = useSelector(selectOrderInformation)
+  const ignored = useSelector(selectIgnored)
+
+  const [directionsView, setDirectionsView] = useState(false)
+  const [calls, setCalls] = useState([])
+
+  useEffect(() => {
+    if (storageTheme !== 'automatic') {
+      setTheme(storageTheme)
+    } else {
+      setTheme(Appearance.getColorScheme())
+    }
+  }, [storageTheme])
+
+  Appearance.addChangeListener((T) => {
+    if (storageTheme === 'automatic') {
+      setTheme(T.colorScheme)
+    }
+  })
+
+  useEffect(() => {
+    const q = query(collection(firestore, "calls"), where("status", "==", "in wait"))
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const calls = []
+  
+      querySnapshot.forEach((doc) => {
+        let isIgnored = ignored.find(e => e === doc.id)
+
+        if (isIgnored === undefined && getDistance(origin.latitude, doc.data().pick_up.latitude, origin.longitude, doc.data().pick_up.longitude) < 10) {
+          calls.push({...doc.data(), id: doc.id})
+        }
+      })
+  
+      setCalls(calls)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (active && calls.length > 0) {
+      setCall()
+    } else {
+      dispatch(setOrderToken(null))
+      dispatch(setOrderInformation(null))
+      dispatch(setCustomerInformation(null))
+    }
+  }, [active, calls])
+
+  const setCall = async () => {
+    dispatch(setOrderToken(calls[0].id))
+    dispatch(setOrderInformation({
+      pick_up: calls[0].pick_up,
+      destination: calls[0].destination,
+      type: calls[0].type
+    }))
+
+    const user = await getDoc(doc(firestore, 'users', calls[0].user))
+
+    dispatch(setCustomerInformation({
+      displayName: user.data().displayName,
+      phone: user.data().phone,
+    }))
+  }
 
   const userLocationChange = (coordinate) => {
     if (active) {
@@ -195,12 +198,23 @@ export default function HomeScreen() {
   }
 
   const ignoreCall = (orderToken) => {
+    dispatch(addIgnored(orderToken))
+
     const index = calls.findIndex(e => e.id === orderToken)
-    let temp = calls;
+    let temp = calls
 
     temp.splice(index, 1)
 
     setCalls(temp)
+
+    if (calls.length === 0) {
+      dispatch(setOrderToken(null))
+      dispatch(setOrderInformation(null))
+      dispatch(setCustomerInformation(null))
+      fitUser(500)
+    } else {
+      setCall()
+    }
   }
 
   const fitUser = (delay) => {
@@ -222,9 +236,9 @@ export default function HomeScreen() {
         { latitude: orderInformation.destination.latitude, longitude: orderInformation.destination.longitude },
       ], {
         edgePadding: {
-          top: 124,
+          top: 140,
           right: 40,
-          bottom: 32,
+          bottom: 20,
           left: 40,
         },
         animated: true

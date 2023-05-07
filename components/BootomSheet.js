@@ -34,7 +34,7 @@ export default function BootomSheet({ acceptCall, ignoreCall, fitDirection }) {
   useEffect(() => {
     if (!!orderToken) {
       handleSnapPress(2)
-      fitDirection(500)
+      fitDirection(512)
     } else {
       handleSnapPress(0)
     }
