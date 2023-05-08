@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Appearance, PixelRatio, Platform, StyleSheet, Switch, View } from 'react-native'
+import { Appearance, Platform, StyleSheet, Switch, View } from 'react-native'
 import { SafeAreaView, Text, TouchableHighlight } from '../components/Themed'
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -86,7 +86,7 @@ export default function HomeScreen() {
   const orderInformation = useSelector(selectOrderInformation)
   const ignored = useSelector(selectIgnored)
 
-  const [directionsView, setDirectionsView] = useState(false)
+  const [status, setStatus] = useState('in wait')
   const [calls, setCalls] = useState([])
 
   useEffect(() => {
@@ -106,18 +106,22 @@ export default function HomeScreen() {
   useEffect(() => {
     const q = query(collection(firestore, "calls"), where("status", "==", "in wait"))
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const calls = []
-  
-      querySnapshot.forEach((doc) => {
-        let isIgnored = ignored.find(e => e === doc.id)
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const d = await getDoc(doc(firestore, "drivers", userToken))
 
-        if (isIgnored === undefined && getDistance(origin.latitude, doc.data().pick_up.latitude, origin.longitude, doc.data().pick_up.longitude) < 10) {
-          calls.push({...doc.data(), id: doc.id})
-        }
-      })
+      if (d.data().active && d.data().available) {
+        const temp = []
+
+        querySnapshot.forEach((doc) => {
+          let isIgnored = ignored.find(e => e === doc.id)
   
-      setCalls(calls)
+          if (isIgnored === undefined && getDistance(origin.latitude, doc.data().pick_up.latitude, origin.longitude, doc.data().pick_up.longitude) < 10) {
+            temp.push({...doc.data(), id: doc.id})
+          }
+        })
+    
+        setCalls(temp)
+      }
     })
   }, [])
 
@@ -132,7 +136,6 @@ export default function HomeScreen() {
   }, [active, calls])
 
   const setCall = async () => {
-    dispatch(setOrderToken(calls[0].id))
     dispatch(setOrderInformation({
       pick_up: calls[0].pick_up,
       destination: calls[0].destination,
@@ -143,8 +146,11 @@ export default function HomeScreen() {
 
     dispatch(setCustomerInformation({
       displayName: user.data().displayName,
-      phone: user.data().phone,
+      phoneNumber: user.data().phoneNumber,
+      photoURL: user.data().photoURL
     }))
+
+    dispatch(setOrderToken(calls[0].id))
   }
 
   const userLocationChange = (coordinate) => {
@@ -195,6 +201,7 @@ export default function HomeScreen() {
     });
 
     dispatch(setAvailable(false))
+    setStatus('waiting driver')
   }
 
   const ignoreCall = (orderToken) => {
@@ -287,12 +294,12 @@ export default function HomeScreen() {
         )
       }
 
-      <Map mapRef={mapRef} origin={origin} directionsView={directionsView} userLocationChange={userLocationChange} insets={insets}>
+      <Map mapRef={mapRef} origin={origin} userLocationChange={userLocationChange} insets={insets}>
         {
-          orderToken && (
+          (orderToken && (status === 'in wait' || status === 'waiting driver')) && (
             <MapViewDirections 
               origin={origin}
-              destination={orderInformation.pick_up}
+              destination={orderInformation?.pick_up}
               apikey={GOOGLE_API_KEY}
               strokeWidth={4}
               strokeColor={Colors[theme]['tint']}
@@ -301,10 +308,10 @@ export default function HomeScreen() {
         }
 
         {
-          orderToken && (
+          (orderToken && status === 'in wait' ) && (
             <MapViewDirections 
-              origin={orderInformation.pick_up}
-              destination={orderInformation.destination}
+              origin={orderInformation?.pick_up}
+              destination={orderInformation?.destination}
               apikey={GOOGLE_API_KEY}
               strokeWidth={4}
               strokeColor={Colors[theme]['primary']}
@@ -338,7 +345,7 @@ export default function HomeScreen() {
         }
       </Map>
 
-      <BootomSheet acceptCall={acceptCall} ignoreCall={ignoreCall} fitDirection={fitDirection} />
+      <BootomSheet status={status} setStatus={setStatus} acceptCall={acceptCall} ignoreCall={ignoreCall} fitDirection={fitDirection} />
     </View>
   )
 }

@@ -7,7 +7,7 @@ import MapColor from '../constants/Map'
 import { useSelector } from 'react-redux'
 import { selectTheme } from '../slices/authSlice'
 
-export default function Map({ children, mapRef, origin, directionsView, userLocationChange, insets }) {
+export default function Map({ children, mapRef, origin, userLocationChange, insets }) {
   const storageTheme = useSelector(selectTheme)
   const [theme, setTheme] = useState(storageTheme === 'automatic' ? Appearance.getColorScheme() : storageTheme);
 
@@ -35,7 +35,7 @@ export default function Map({ children, mapRef, origin, directionsView, userLoca
         longitudeDelta: 0.012,
       }}
       provider={PROVIDER_GOOGLE}
-      showsUserLocation={!directionsView}
+      showsUserLocation={true}
       onUserLocationChange={coordinate => userLocationChange(coordinate)}
       showsMyLocationButton={false}
       rotateEnabled={false}
