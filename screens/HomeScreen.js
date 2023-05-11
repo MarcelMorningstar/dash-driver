@@ -225,6 +225,16 @@ export default function HomeScreen() {
     }
   }
 
+  const setArrived = async (orderToken) => {
+    const callRef = doc(firestore, "calls", orderToken);
+
+    await updateDoc(callRef, {
+      status: 'arrived'
+    });
+
+    setStatus('arrived')
+  }
+
   const fitUser = (delay) => {
     setTimeout(() => { 
       mapRef.current.animateToRegion({ 
@@ -309,7 +319,7 @@ export default function HomeScreen() {
         }
 
         {
-          (orderToken && status === 'in wait' ) && (
+          (orderToken && (status === 'in wait')) && (
             <MapViewDirections 
               origin={orderInformation?.pick_up}
               destination={orderInformation?.destination}
@@ -321,7 +331,7 @@ export default function HomeScreen() {
         }
 
         {
-          orderInformation?.pick_up && (
+          (orderInformation?.pick_up && (status === 'in wait' || status === 'waiting driver')) && (
             <Marker 
               identifier='customer'
               coordinate={{
@@ -334,7 +344,7 @@ export default function HomeScreen() {
         }
 
         {
-          orderInformation?.destination && (
+          (orderInformation?.destination && (status === 'in wait' || status === 'in progress')) && (
             <Marker 
               identifier='destination'
               coordinate={{
@@ -346,7 +356,7 @@ export default function HomeScreen() {
         }
       </Map>
 
-      <BootomSheet status={status} setStatus={setStatus} acceptCall={acceptCall} ignoreCall={ignoreCall} fitDirection={fitDirection} />
+      <BootomSheet status={status} setStatus={setStatus} acceptCall={acceptCall} ignoreCall={ignoreCall} setArrived={setArrived} fitDirection={fitDirection} />
     </View>
   )
 }
