@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Animated, Appearance, StyleSheet, View, TouchableHighlight, Image } from 'react-native'
+import { Animated, Appearance, StyleSheet, View, TouchableHighlight, Image, TouchableOpacity } from 'react-native'
 import { PrimaryTouchableHighlight, SecondaryTouchableOpacity, SecondaryView, Text, Feather, FontAwesome5 } from './Themed'
 import { BottomSheetModal, BottomSheetModalProvider } from "@gorhom/bottom-sheet"
+
+import Overlay from "./Overlay"
 
 import Colors from '../constants/Colors'
 
@@ -11,10 +13,12 @@ import { useSelector } from 'react-redux'
 import { selectOrderToken, selectOrderInformation, selectCustomerInformation } from '../slices/orderSlice'
 import { selectTheme } from '../slices/authSlice'
 
-export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, fitDirection }) {
+export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, cancelOrder, fitDirection }) {
   const orderToken = useSelector(selectOrderToken)
   const orderInformation = useSelector(selectOrderInformation)
   const customerInformation = useSelector(selectCustomerInformation)
+
+  const [cancel, setCancel] = useState(false)
 
   const storageTheme = useSelector(selectTheme)
   const [theme, setTheme] = useState(storageTheme === 'automatic' ? Appearance.getColorScheme() : storageTheme);
@@ -189,11 +193,33 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                       activeOpacity={0.8}
                       underlayColor="#6A6A6A"
                       style={[{ width: '32%', backgroundColor: '#555555' }, styles.button]}
-                      onPress={() => {}}
+                      onPress={() => setCancel(true)}
                     >
                       <Text style={{ fontSize: 16, fontWeight: '400', color: 'white' }}>Cancel</Text>
                     </TouchableHighlight>
                   </View>
+
+                  <Overlay visible={cancel}>
+                    <SecondaryView style={styles.modalView}>
+                      <Text style={{ marginBottom: 2, textAlign: 'center', fontSize: 21, fontWeight: '500' }}>Cancel</Text>
+                      <Text style={{ marginVertical: 8, textAlign: 'center', fontSize: 14 }}>Are you sure want to cancel?</Text>
+
+                      <View style={{ display: 'flex', flexDirection: 'row' }}>
+                        <TouchableOpacity
+                          style={[styles.buttons, { marginRight: 4, backgroundColor: '#ED4337' }]}
+                          onPress={() => { cancelOrder(orderToken); setCancel(false)}}
+                        >
+                          <Text style={{ color: 'white', fontWeight: '500' }}>Yes</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.buttons, { marginLeft: 4, backgroundColor: '#F0F0F0' }]}
+                          onPress={() => setCancel(false)}
+                        >
+                          <Text style={{ color: 'black', fontWeight: '500' }}>No</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </SecondaryView>
+                  </Overlay>
                 </View>
               )
             }
@@ -222,4 +248,20 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row'
   },
+  modalView: {
+    padding: 20,
+    borderRadius: 21,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  buttons: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16
+  }
 });

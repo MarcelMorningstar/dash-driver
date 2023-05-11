@@ -235,6 +235,27 @@ export default function HomeScreen() {
     setStatus('arrived')
   }
 
+  const cancelOrder = async (orderToken) => {
+    const callRef = doc(firestore, "calls", orderToken);
+    const driverRef = doc(firestore, "drivers", userToken);
+
+    await updateDoc(callRef, {
+      status: 'canceled'
+    });
+
+    await updateDoc(driverRef, {
+      available: true
+    });
+
+    dispatch(setOrderToken(null))
+    dispatch(setOrderInformation(null))
+    dispatch(setCustomerInformation(null))
+    dispatch(setAvailable(true))
+    setStatus('in wait')
+
+    fitUser(1)
+  }
+
   const fitUser = (delay) => {
     setTimeout(() => { 
       mapRef.current.animateToRegion({ 
@@ -356,7 +377,7 @@ export default function HomeScreen() {
         }
       </Map>
 
-      <BootomSheet status={status} setStatus={setStatus} acceptCall={acceptCall} ignoreCall={ignoreCall} setArrived={setArrived} fitDirection={fitDirection} />
+      <BootomSheet status={status} setStatus={setStatus} acceptCall={acceptCall} ignoreCall={ignoreCall} setArrived={setArrived} cancelOrder={cancelOrder} fitDirection={fitDirection} />
     </View>
   )
 }
