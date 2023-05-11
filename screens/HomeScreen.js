@@ -139,7 +139,8 @@ export default function HomeScreen() {
     dispatch(setOrderInformation({
       pick_up: calls[0].pick_up,
       destination: calls[0].destination,
-      type: calls[0].type
+      type: calls[0].type,
+      travelInformation: calls[0].travelInformation
     }))
 
     const user = await getDoc(doc(firestore, 'users', calls[0].user))

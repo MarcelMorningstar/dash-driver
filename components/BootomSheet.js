@@ -73,6 +73,13 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
     }).start();
   };
 
+  const getMinutes = (time) => {
+    let a = time.split(':');
+    let minutes = (+a[0]) * 60 + (+a[1]);
+
+    return minutes
+  }
+
   return (
     <BottomSheetModalProvider>
       <Animated.View style={{ height: sheetHeight }}>
@@ -118,7 +125,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                     >
                       <View style={{ alignItems: 'center' }}>
                         <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Accept</Text>
-                        <Text style={{ fontSize: 14, fontWeight: '400', color: 'white' }}>5 min ● 1.6 km</Text>
+                        <Text style={{ fontSize: 14, fontWeight: '400', color: 'white' }}>{ `${orderInformation?.travelInformation?.duration && getMinutes(orderInformation?.travelInformation?.duration)} min ● ${orderInformation?.travelInformation?.distance} km` }</Text>
                       </View>
                     </PrimaryTouchableHighlight>
                   
