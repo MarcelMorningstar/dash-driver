@@ -143,7 +143,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                     </TouchableHighlight>
                   </View>
                 </View>
-              ) : status === 'waiting driver' && (
+              ) : status === 'waiting driver' ? (
                 <View style={{ width: '100%', height: 202, justifyContent: 'space-between' }}>
                   <View>
                     <Text style={{ textAlign: 'center', fontSize: 18 }}>Pick up Customer</Text>
@@ -198,32 +198,88 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                       <Text style={{ fontSize: 16, fontWeight: '400', color: 'white' }}>Cancel</Text>
                     </TouchableHighlight>
                   </View>
-
-                  <Overlay visible={cancel}>
-                    <SecondaryView style={styles.modalView}>
-                      <Text style={{ marginBottom: 2, textAlign: 'center', fontSize: 21, fontWeight: '500' }}>Cancel</Text>
-                      <Text style={{ marginVertical: 8, textAlign: 'center', fontSize: 14 }}>Are you sure want to cancel?</Text>
-
-                      <View style={{ display: 'flex', flexDirection: 'row' }}>
-                        <TouchableOpacity
-                          style={[styles.buttons, { marginRight: 4, backgroundColor: '#ED4337' }]}
-                          onPress={() => { cancelOrder(orderToken); setCancel(false)}}
-                        >
-                          <Text style={{ color: 'white', fontWeight: '500' }}>Yes</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[styles.buttons, { marginLeft: 4, backgroundColor: '#F0F0F0' }]}
-                          onPress={() => setCancel(false)}
-                        >
-                          <Text style={{ color: 'black', fontWeight: '500' }}>No</Text>
-                        </TouchableOpacity>
+                </View>
+              ) : status === 'arrived' && (
+                <View style={{ width: '100%', height: 202, justifyContent: 'space-between' }}>
+                  <View>
+                    <Text style={{ textAlign: 'center', fontSize: 18 }}>Wait a Customer</Text>
+                    <View style={[styles.row, { justifyContent: 'space-between' }]}>
+                      <View style={styles.row}>
+                        <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48, marginRight: 12, backgroundColor: '#DDDDDD', borderRadius: 24 }}>
+                          {
+                            customerInformation?.photoURL.match(/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi) ?
+                              <Image
+                                source={{
+                                  uri: customerInformation.photoURL,
+                                }}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  resizeMode: 'cover',
+                                  borderRadius: 24
+                                }}
+                              />
+                            : 
+                              <FontAwesome5 name="user-alt" size={24} color="#555555" />
+                          }
+                        </View>
+                      
+                        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                          <Text style={{ fontSize: 15 }}>{ customerInformation?.displayName }</Text>
+                        </View>
                       </View>
-                    </SecondaryView>
-                  </Overlay>
+                        
+                      <SecondaryTouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: 24, }} onPress={() => callNumber(customerInformation.phone)}>
+                        <Feather name="phone" size={28} />
+                      </SecondaryTouchableOpacity>
+                    </View>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <PrimaryTouchableHighlight
+                      style={[{ width: '64%' }, styles.button]}
+                      onPress={() => setArrived(orderToken)}
+                    >
+                      <View style={{ alignItems: 'center' }}>
+                        <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Ready</Text>
+                      </View>
+                    </PrimaryTouchableHighlight>
+                  
+                    <TouchableHighlight
+                      activeOpacity={0.8}
+                      underlayColor="#6A6A6A"
+                      style={[{ width: '32%', backgroundColor: '#555555' }, styles.button]}
+                      onPress={() => setCancel(true)}
+                    >
+                      <Text style={{ fontSize: 16, fontWeight: '400', color: 'white' }}>Cancel</Text>
+                    </TouchableHighlight>
+                  </View>
                 </View>
               )
             }
           </View>
+
+          <Overlay visible={cancel}>
+            <SecondaryView style={styles.modalView}>
+              <Text style={{ marginBottom: 2, textAlign: 'center', fontSize: 21, fontWeight: '500' }}>Cancel</Text>
+              <Text style={{ marginVertical: 8, textAlign: 'center', fontSize: 14 }}>Are you sure want to cancel?</Text>
+
+              <View style={{ display: 'flex', flexDirection: 'row' }}>
+                <TouchableOpacity
+                  style={[styles.buttons, { marginRight: 4, backgroundColor: '#ED4337' }]}
+                  onPress={() => { cancelOrder(orderToken); setCancel(false)}}
+                >
+                  <Text style={{ color: 'white', fontWeight: '500' }}>Yes</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.buttons, { marginLeft: 4, backgroundColor: '#F0F0F0' }]}
+                  onPress={() => setCancel(false)}
+                >
+                  <Text style={{ color: 'black', fontWeight: '500' }}>No</Text>
+                </TouchableOpacity>
+              </View>
+            </SecondaryView>
+          </Overlay>
         </BottomSheetModal>
       </Animated.View>
     </BottomSheetModalProvider>
