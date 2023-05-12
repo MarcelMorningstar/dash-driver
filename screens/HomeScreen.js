@@ -315,7 +315,7 @@ export default function HomeScreen() {
       </TouchableHighlight>
 
       {
-        orderToken && (
+        (orderToken && (status === 'in wait' || status === 'waiting driver' || status === 'in progress')) && (
           <TouchableHighlight
             activeOpacity={0.6}
             style={[styles.centerBtn, { left: 16 }]}
