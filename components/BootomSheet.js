@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux'
 import { selectOrderToken, selectOrderInformation, selectCustomerInformation } from '../slices/orderSlice'
 import { selectTheme } from '../slices/authSlice'
 
-export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, cancelOrder, fitDirection }) {
+export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, setInProgress, cancelOrder, fitDirection }) {
   const orderToken = useSelector(selectOrderToken)
   const orderInformation = useSelector(selectOrderInformation)
   const customerInformation = useSelector(selectCustomerInformation)
@@ -39,7 +39,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
 
   useEffect(() => {
     if (!!orderToken) {
-      handleSnapPress(2)
+      handleSnapPress(1)
       fitDirection(512)
     } else {
       handleSnapPress(0)
@@ -55,7 +55,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
   const [b, setB] = useState(0)
 
   const bottomSheetModalRef = useRef(null);
-  const snapPoints = useMemo(() => [24, 107, 250, 360], []);
+  const snapPoints = useMemo(() => [24, 152, 250, 360], []);
 
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
@@ -199,7 +199,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                     </TouchableHighlight>
                   </View>
                 </View>
-              ) : status === 'arrived' && (
+              ) : status === 'arrived' ? (
                 <View style={{ width: '100%', height: 202, justifyContent: 'space-between' }}>
                   <View>
                     <Text style={{ textAlign: 'center', fontSize: 18 }}>Wait a Customer</Text>
@@ -238,10 +238,10 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <PrimaryTouchableHighlight
                       style={[{ width: '64%' }, styles.button]}
-                      onPress={() => setArrived(orderToken)}
+                      onPress={() => { setInProgress(orderToken); handleSnapPress(1) }}
                     >
                       <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Ready</Text>
+                        <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Ready to Drive</Text>
                       </View>
                     </PrimaryTouchableHighlight>
                   
@@ -253,6 +253,21 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                     >
                       <Text style={{ fontSize: 16, fontWeight: '400', color: 'white' }}>Cancel</Text>
                     </TouchableHighlight>
+                  </View>
+                </View>
+              ) : status === 'in progress' && (
+                <View style={{ width: '100%', height: 111, justifyContent: 'space-between' }}>
+                  <Text style={{ textAlign: 'center', fontSize: 18 }}>Drive a Customer</Text>
+
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <PrimaryTouchableHighlight
+                      style={[{ width: '100%' }, styles.button]}
+                      onPress={() => {}}
+                    >
+                      <View style={{ alignItems: 'center' }}>
+                        <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Ready</Text>
+                      </View>
+                    </PrimaryTouchableHighlight>
                   </View>
                 </View>
               )

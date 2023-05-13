@@ -235,6 +235,17 @@ export default function HomeScreen() {
     setStatus('arrived')
   }
 
+  const setInProgress = async (orderToken) => {
+    const callRef = doc(firestore, "calls", orderToken);
+
+    await updateDoc(callRef, {
+      pick_up_time: new Date(),
+      status: 'in progress'
+    });
+
+    setStatus('in progress')
+  }
+
   const cancelOrder = async (orderToken) => {
     const callRef = doc(firestore, "calls", orderToken);
     const driverRef = doc(firestore, "drivers", userToken);
@@ -377,7 +388,16 @@ export default function HomeScreen() {
         }
       </Map>
 
-      <BootomSheet status={status} setStatus={setStatus} acceptCall={acceptCall} ignoreCall={ignoreCall} setArrived={setArrived} cancelOrder={cancelOrder} fitDirection={fitDirection} />
+      <BootomSheet 
+        status={status} 
+        setStatus={setStatus} 
+        acceptCall={acceptCall} 
+        ignoreCall={ignoreCall} 
+        setArrived={setArrived} 
+        cancelOrder={cancelOrder} 
+        setInProgress={setInProgress}
+        fitDirection={fitDirection} 
+      />
     </View>
   )
 }
