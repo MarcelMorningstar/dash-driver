@@ -192,13 +192,13 @@ export default function HomeScreen() {
     const callRef = doc(firestore, "calls", orderToken);
     const driverRef = doc(firestore, "drivers", userToken);
 
+    await updateDoc(driverRef, {
+      available: false
+    });
+
     await updateDoc(callRef, {
       driver: userToken,
       status: 'waiting driver'
-    });
-
-    await updateDoc(driverRef, {
-      available: false
     });
 
     dispatch(setAvailable(false))
@@ -244,6 +244,26 @@ export default function HomeScreen() {
     });
 
     setStatus('in progress')
+  }
+
+  const setDone = async (orderToken) => {
+    const callRef = doc(firestore, "calls", orderToken);
+    const driverRef = doc(firestore, "drivers", userToken);
+
+    await updateDoc(callRef, {
+      finished_at: new Date(),
+      status: 'done'
+    });
+
+    await updateDoc(driverRef, {
+      available: true
+    });
+
+    dispatch(setOrderToken(null))
+    dispatch(setOrderInformation(null))
+    dispatch(setCustomerInformation(null))
+    dispatch(setAvailable(true))
+    setStatus('in wait')
   }
 
   const cancelOrder = async (orderToken) => {
@@ -422,8 +442,9 @@ export default function HomeScreen() {
         acceptCall={acceptCall} 
         ignoreCall={ignoreCall} 
         setArrived={setArrived} 
-        cancelOrder={cancelOrder} 
         setInProgress={setInProgress}
+        setDone={setDone}
+        cancelOrder={cancelOrder} 
         fitDirection={fitDirection} 
       />
     </View>

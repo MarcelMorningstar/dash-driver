@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux'
 import { selectOrderToken, selectOrderInformation, selectCustomerInformation } from '../slices/orderSlice'
 import { selectTheme } from '../slices/authSlice'
 
-export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, setInProgress, cancelOrder, fitDirection }) {
+export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, setInProgress, setDone, cancelOrder, fitDirection }) {
   const orderToken = useSelector(selectOrderToken)
   const orderInformation = useSelector(selectOrderInformation)
   const customerInformation = useSelector(selectCustomerInformation)
@@ -262,7 +262,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <PrimaryTouchableHighlight
                       style={[{ width: '100%' }, styles.button]}
-                      onPress={() => {}}
+                      onPress={() => { setDone(orderToken); handleSnapPress(0) }}
                     >
                       <View style={{ alignItems: 'center' }}>
                         <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Ready</Text>
