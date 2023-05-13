@@ -363,6 +363,18 @@ export default function HomeScreen() {
         }
 
         {
+          (status === 'in progress') && (
+            <MapViewDirections 
+              origin={origin}
+              destination={orderInformation?.destination}
+              apikey={GOOGLE_API_KEY}
+              strokeWidth={4}
+              strokeColor={Colors[theme]['primary']}
+            />
+          )
+        }
+
+        {
           (orderInformation?.pick_up && (status === 'in wait' || status === 'waiting driver')) && (
             <Marker 
               identifier='customer'
