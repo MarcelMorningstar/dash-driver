@@ -279,12 +279,28 @@ export default function HomeScreen() {
   }
 
   const fitDirection = (delay) => {
-    setTimeout(() => {
-      mapRef.current.fitToCoordinates([
+    let to = []
+
+    if (status === 'in progress') {
+      to = [
+        { latitude: origin.latitude, longitude: origin.longitude },
+        { latitude: orderInformation.destination.latitude, longitude: orderInformation.destination.longitude },
+      ]
+    } else if (status === 'waiting driver') {
+      to = [
+        { latitude: origin.latitude, longitude: origin.longitude },
+        { latitude: orderInformation.pick_up.latitude, longitude: orderInformation.pick_up.longitude },
+      ]
+    } else {
+      to = [
         { latitude: origin.latitude, longitude: origin.longitude },
         { latitude: orderInformation.pick_up.latitude, longitude: orderInformation.pick_up.longitude },
         { latitude: orderInformation.destination.latitude, longitude: orderInformation.destination.longitude },
-      ], {
+      ]
+    }
+
+    setTimeout(() => {
+      mapRef.current.fitToCoordinates(to, {
         edgePadding: {
           top: 140,
           right: 40,
