@@ -86,7 +86,7 @@ export default function ProfileScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.btn}
-            onPress={() => {}}
+            onPress={() => navigation.navigate('History')}
           >
             <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
               <Octicons name="history" size={28} style={{ marginRight: 12 }} />
