@@ -250,8 +250,16 @@ export default function HomeScreen() {
     const callRef = doc(firestore, "calls", orderToken);
     const driverRef = doc(firestore, "drivers", userToken);
 
+    const call = await getDoc(callRef)
+    const driver = await getDoc(driverRef)
+
+    const finished_at = new Date()
+    const time = (finished_at - call.data().pick_up_time.toDate()) / 60000
+    const price = parseFloat((driver.data().services[call.data().type].values[2] + (driver.data().services[call.data().type].values[0] * call.data().travelInformation.distance) + (driver.data().services[call.data().type].values[1] * time)).toFixed(2))
+
     await updateDoc(callRef, {
-      finished_at: new Date(),
+      finished_at: finished_at,
+      price: price,
       status: 'done'
     });
 
