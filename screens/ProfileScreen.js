@@ -93,6 +93,18 @@ export default function ProfileScreen({ navigation }) {
               <Text style={{ fontSize: 14 }}>History</Text>
             </View>
           </TouchableOpacity>
+
+          <Divider height={1.4} borderRadius={4} />
+
+          <TouchableOpacity
+            style={styles.btn}
+            onPress={() => navigation.navigate('Cars')}
+          >
+            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome5 name="car" size={28} style={{ marginRight: 12 }} />
+              <Text style={{ fontSize: 14 }}>Car</Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
         <Divider height={5} />

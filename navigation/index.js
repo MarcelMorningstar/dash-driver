@@ -86,6 +86,7 @@ function RootNavigator() {
               lastName: docSnap.data().lastName,
               phoneNumber: docSnap.data().phoneNumber,
               email: docSnap.data().email,
+              car: docSnap.data().car,
               services: docSnap.data().services,
               image: docSnap.data().photoURL,
               thumbnail: fileUri
