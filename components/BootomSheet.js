@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux'
 import { selectOrderToken, selectOrderInformation, selectCustomerInformation } from '../slices/orderSlice'
 import { selectTheme } from '../slices/authSlice'
 
-export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, setInProgress, setDone, cancelOrder, fitDirection }) {
+export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, setInProgress, setDone, cancelOrder, fitUser, fitDirection }) {
   const orderToken = useSelector(selectOrderToken)
   const orderInformation = useSelector(selectOrderInformation)
   const customerInformation = useSelector(selectCustomerInformation)
@@ -98,10 +98,11 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
             {
               status === 'in wait' ? (
                 <View style={{ height: 202, flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <View style={{ height: 42 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', height: 42 }}>
                     <Text style={{ fontSize: 15 }}>{ customerInformation?.displayName }</Text>
                     
                     <View style={{ position: 'absolute', bottom: 0, left: -24, width: '200%', height: 1.7, backgroundColor: Colors[theme]['secondaryBackground'] }} />
+                    <Text>{ orderInformation?.additions.join(', ') }</Text>
                   </View>
 
                   <View style={{ marginLeft: 16 }}>
@@ -125,7 +126,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <PrimaryTouchableHighlight
                       style={[{ width: '64%' }, styles.button]}
-                      onPress={() => acceptCall(orderToken)}
+                      onPress={() => { acceptCall(orderToken); fitDirection(1, 'waiting driver'); }}
                     >
                       <View style={{ alignItems: 'center' }}>
                         <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Accept</Text>
@@ -182,7 +183,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <PrimaryTouchableHighlight
                       style={[{ width: '64%' }, styles.button]}
-                      onPress={() => setArrived(orderToken)}
+                      onPress={() => { setArrived(orderToken); fitUser(1); }}
                     >
                       <View style={{ alignItems: 'center' }}>
                         <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Arrived</Text>
@@ -238,7 +239,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <PrimaryTouchableHighlight
                       style={[{ width: '64%' }, styles.button]}
-                      onPress={() => { setInProgress(orderToken); handleSnapPress(1) }}
+                      onPress={() => { setInProgress(orderToken); handleSnapPress(1); fitDirection(1, 'in progress'); }}
                     >
                       <View style={{ alignItems: 'center' }}>
                         <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Ready to Drive</Text>
@@ -262,7 +263,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <PrimaryTouchableHighlight
                       style={[{ width: '100%' }, styles.button]}
-                      onPress={() => { setDone(orderToken); handleSnapPress(0) }}
+                      onPress={() => { setDone(orderToken); handleSnapPress(0); fitUser(1); }}
                     >
                       <View style={{ alignItems: 'center' }}>
                         <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Ready</Text>

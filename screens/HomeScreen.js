@@ -140,7 +140,8 @@ export default function HomeScreen() {
       pick_up: calls[0].pick_up,
       destination: calls[0].destination,
       type: calls[0].type,
-      travelInformation: calls[0].travelInformation
+      travelInformation: calls[0].travelInformation,
+      additions: calls[0].additions
     }))
 
     const user = await getDoc(doc(firestore, 'users', calls[0].user))
@@ -306,15 +307,15 @@ export default function HomeScreen() {
     }, delay)
   }
 
-  const fitDirection = (delay) => {
+  const fitDirection = (delay, s) => {
     let to = []
 
-    if (status === 'in progress') {
+    if (s === 'in progress') {
       to = [
         { latitude: origin.latitude, longitude: origin.longitude },
         { latitude: orderInformation.destination.latitude, longitude: orderInformation.destination.longitude },
       ]
-    } else if (status === 'waiting driver') {
+    } else if (s === 'waiting driver') {
       to = [
         { latitude: origin.latitude, longitude: origin.longitude },
         { latitude: orderInformation.pick_up.latitude, longitude: orderInformation.pick_up.longitude },
@@ -453,6 +454,7 @@ export default function HomeScreen() {
         setInProgress={setInProgress}
         setDone={setDone}
         cancelOrder={cancelOrder} 
+        fitUser={fitUser} 
         fitDirection={fitDirection} 
       />
     </View>
