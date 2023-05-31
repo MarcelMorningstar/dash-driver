@@ -230,7 +230,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                         </View>
                       </View>
                         
-                      <SecondaryTouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: 24, }} onPress={() => callNumber(customerInformation.phone)}>
+                      <SecondaryTouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: 24, }} onPress={() => callNumber(customerInformation.phoneNumber)}>
                         <Feather name="phone" size={28} />
                       </SecondaryTouchableOpacity>
                     </View>
