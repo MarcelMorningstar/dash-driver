@@ -13,12 +13,13 @@ import { useSelector } from 'react-redux'
 import { selectOrderToken, selectOrderInformation, selectCustomerInformation } from '../slices/orderSlice'
 import { selectTheme } from '../slices/authSlice'
 
-export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, setInProgress, setDone, cancelOrder, fitUser, fitDirection }) {
+export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall, setArrived, setInProgress, setPrice, setDone, cancelOrder, fitUser, fitDirection }) {
   const orderToken = useSelector(selectOrderToken)
   const orderInformation = useSelector(selectOrderInformation)
   const customerInformation = useSelector(selectCustomerInformation)
 
   const [cancel, setCancel] = useState(false)
+  const [pay, setPay] = useState(false)
 
   const storageTheme = useSelector(selectTheme)
   const [theme, setTheme] = useState(storageTheme === 'automatic' ? Appearance.getColorScheme() : storageTheme);
@@ -263,13 +264,35 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <PrimaryTouchableHighlight
                       style={[{ width: '100%' }, styles.button]}
-                      onPress={() => { setDone(orderToken); handleSnapPress(0); fitUser(1); }}
+                      onPress={() => { setPay(true); setPrice(orderToken); handleSnapPress(0); fitUser(1); }}
                     >
                       <View style={{ alignItems: 'center' }}>
                         <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Ready</Text>
                       </View>
                     </PrimaryTouchableHighlight>
                   </View>
+
+                  <Overlay visible={pay}>
+                    <SecondaryView style={styles.modalView}>
+                      <Text style={{ marginBottom: 2, textAlign: 'center', fontSize: 21, fontWeight: '500' }}>Payment</Text>
+                      <Text style={{ marginVertical: 8, textAlign: 'center', fontSize: 14 }}>Customers drive value is { orderInformation?.price }€</Text>
+
+                      <View style={{ display: 'flex', flexDirection: 'row' }}>
+                        <TouchableOpacity
+                          style={[styles.buttons, { marginRight: 4, backgroundColor: '#ED4337' }]}
+                          onPress={() => { setPay(false); setDone(orderToken); }}
+                        >
+                          <Text style={{ color: 'white', fontWeight: '500' }}>Rejected</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.buttons, { marginLeft: 4, backgroundColor: '#F0F0F0' }]}
+                          onPress={() => { setPay(false); setDone(orderToken); }}
+                        >
+                          <Text style={{ color: 'black', fontWeight: '500' }}>Confirm</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </SecondaryView>
+                  </Overlay>
                 </View>
               )
             }

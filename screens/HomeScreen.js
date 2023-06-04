@@ -247,7 +247,7 @@ export default function HomeScreen() {
     setStatus('in progress')
   }
 
-  const setDone = async (orderToken) => {
+  const setPrice = async (orderToken) => {
     const callRef = doc(firestore, "calls", orderToken);
     const driverRef = doc(firestore, "drivers", userToken);
 
@@ -257,10 +257,21 @@ export default function HomeScreen() {
     const finished_at = new Date()
     const time = (finished_at - call.data().pick_up_time.toDate()) / 60000
     const price = parseFloat((driver.data().services[call.data().type].values[2] + (driver.data().services[call.data().type].values[0] * call.data().travelInformation.distance) + (driver.data().services[call.data().type].values[1] * time)).toFixed(2))
+  
+    await updateDoc(callRef, {
+      price: price,
+      status: 'pay'
+    });
+
+    dispatch(setOrderInformation({ ...orderInformation, price: price }))
+  }
+
+  const setDone = async (orderToken) => {
+    const callRef = doc(firestore, "calls", orderToken);
+    const driverRef = doc(firestore, "drivers", userToken);
 
     await updateDoc(callRef, {
-      finished_at: finished_at,
-      price: price,
+      finished_at: new Date(),
       status: 'done'
     });
 
@@ -452,6 +463,7 @@ export default function HomeScreen() {
         ignoreCall={ignoreCall} 
         setArrived={setArrived} 
         setInProgress={setInProgress}
+        setPrice={setPrice}
         setDone={setDone}
         cancelOrder={cancelOrder} 
         fitUser={fitUser} 
