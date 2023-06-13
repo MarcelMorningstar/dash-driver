@@ -267,7 +267,7 @@ export default function BootomSheet({ status, setStatus, acceptCall, ignoreCall,
                       onPress={() => { setPay(true); setPrice(orderToken); handleSnapPress(0); fitUser(1); }}
                     >
                       <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Ready</Text>
+                        <Text style={{ fontSize: 18, fontWeight: '500', color: 'white' }}>Finish</Text>
                       </View>
                     </PrimaryTouchableHighlight>
                   </View>
